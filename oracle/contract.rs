@@ -8,6 +8,12 @@ use web3::transports::{Http, WebSocket};
 use crate::events::Event;
 use crate::settings::{HTTP_PROVIDER, WS_PROVIDER, PLATFORM_ADDRESS};
 
+fn create_contract<T>(w: &web3::Web3<T>, address: H160, json: &[u8]) -> web3::contract::Result<Contract<T>>
+    where T: Transport
+{
+    Ok(Contract::from_json(w.eth(), address, json)?)
+}
+
 pub fn create_http_web3() -> web3::Result<web3::Web3<Http>> {
     let transport = Http::new(HTTP_PROVIDER)?;
 
@@ -18,12 +24,6 @@ pub async fn create_ws_web3() -> web3::Result<web3::Web3<WebSocket>> {
     let transport = WebSocket::new(WS_PROVIDER).await?;
 
     Ok(web3::Web3::new(transport))
-}
-
-fn create_contract<T>(w: &web3::Web3<T>, address: H160, json: &[u8]) -> web3::contract::Result<Contract<T>>
-    where T: Transport
-{
-    Ok(Contract::from_json(w.eth(), address, json)?)
 }
 
 pub fn create_oracle_contract<T>(w: &web3::Web3<T>, address: H160) -> web3::contract::Result<Contract<T>>

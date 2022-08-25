@@ -20,17 +20,25 @@ async fn main() -> web3::contract::Result<()> {
 
     info!("Oracle: Initializing");
 
+    initialize_events().await?;
+
+    info!("Finalizing");
+
+    Ok(())
+}
+
+async fn initialize_events() -> web3::contract::Result<()> {
     let web3 = contract::create_ws_web3().await;
 
     match web3 {
-        Ok(w) => initialize_events(w).await?,
-        Err(_) => panic!("Failed")
+        Ok(w) => subscribe_events(w).await?,
+        Err(_) => panic!("Failed to connect")
     }
 
     Ok(())
 }
 
-async fn initialize_events(w: web3::Web3<WebSocket>) -> web3::contract::Result<()> {
+async fn subscribe_events(w: web3::Web3<WebSocket>) -> web3::contract::Result<()> {
     let contract = contract::create_platform_contract(&w)?;
     let sub = contract::subscribe(&w, &contract, Event::MatchCreated).await?;
 
