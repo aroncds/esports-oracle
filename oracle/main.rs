@@ -1,11 +1,12 @@
 use std::future;
+use std::collections::HashMap;
 
 use tokio;
-use log::info;
+use log::{info, error};
 use web3::{
     futures::StreamExt,
     transports::WebSocket,
-    types::Log
+    ethabi::RawLog
 };
 
 mod contract;
@@ -43,10 +44,24 @@ async fn subscribe_events(w: web3::Web3<WebSocket>) -> web3::contract::Result<()
     let sub = contract::subscribe(&w, &contract, Event::MatchCreated).await?;
 
     _ = tokio::join!(tokio::spawn(async move {
-        sub.for_each(|log| {
-            let x: Log = log.unwrap();
+        let event = contract.abi().event("MatchCreated").unwrap();
 
-            info!("OnMatchCreated - Topic: {:?}, Block: {:?}", x.topics.get(0), x.block_number);
+        sub.for_each(|log| {
+            match log {
+                Ok(x) => {
+                    let mut data = HashMap::new();
+
+                    let log = event.parse_log(RawLog {
+                        topics: x.topics.clone(),
+                        data: x.data.0
+                    }).unwrap();
+
+                    log.params.iter().for_each(|i| { data.insert(i.name.clone(), i.value.clone()); });
+
+                    info!("OnMatchCreated - Topic: {:?}, Block: {:?}, Data: {:?}", x.topics.get(0), x.block_number, data);        
+                },
+                Err(x) => error!("Invalid log: {:?}", x)
+            }
 
             future::ready(())
         }).await;
