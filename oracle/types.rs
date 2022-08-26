@@ -19,7 +19,7 @@ impl From<[u8; 32]> for Event {
 }
 
 impl From<Event> for [u8; 32] {
-    fn from(value: Event) -> Self {
+    fn from(value: Event) -> Self {x
         match value {
             Event::MatchCreated => ON_MATCH_CREATED,
             _ => panic!("Invalid value")
