@@ -1,8 +1,9 @@
-use std::future;
+use std::future::{self, Ready};
 use std::collections::HashMap;
 
 use tokio;
 use log::{info, error};
+use web3::types::Log;
 use web3::{
     futures::StreamExt,
     transports::WebSocket,
@@ -44,28 +45,33 @@ async fn subscribe_events(w: web3::Web3<WebSocket>) -> web3::contract::Result<()
     let sub = contract::subscribe(&w, &contract, Event::MatchCreated).await?;
 
     _ = tokio::join!(tokio::spawn(async move {
-        let event = contract.abi().event("MatchCreated").unwrap();
+        let on_match_created = contract.abi().event("MatchCreated").unwrap();
 
-        sub.for_each(|log| {
-            match log {
-                Ok(x) => {
-                    let mut data = HashMap::new();
-
-                    let log = event.parse_log(RawLog {
-                        topics: x.topics.clone(),
-                        data: x.data.0
-                    }).unwrap();
-
-                    log.params.iter().for_each(|i| { data.insert(i.name.clone(), i.value.clone()); });
-
-                    info!("OnMatchCreated - Topic: {:?}, Block: {:?}, Data: {:?}", x.topics.get(0), x.block_number, data);        
-                },
-                Err(x) => error!("Invalid log: {:?}", x)
-            }
-
-            future::ready(())
-        }).await;
+        sub.for_each(process_event(on_match_created)).await;
     }));
 
     Ok(())
+}
+
+fn process_event<'a>(event: &'a web3::ethabi::Event) -> impl Fn(Result<Log, web3::Error>) -> Ready<()> + 'a{
+    |log| {
+        if let Ok(x) = log {
+            let mut params = HashMap::new();
+
+            let log = event.parse_log(RawLog {
+                topics: x.topics.clone(), data: x.data.0 }).unwrap();
+
+            log.params.iter().for_each(|i| {
+                params.insert(i.name.clone(), i.value.clone()); });
+
+            info!("{:?} - Topic: {:?}, Block: {:?}, Data: {:?}",
+                event.name,
+                x.topics.get(0),
+                x.block_number,
+                params
+            );  
+        }
+
+        future::ready(())
+    }
 }

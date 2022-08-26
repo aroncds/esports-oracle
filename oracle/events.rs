@@ -36,3 +36,12 @@ impl From<Event> for H256 {
         }
     }
 }
+
+impl From<Event> for &str {
+    fn from(value: Event) -> Self {
+        match value {
+            Event::MatchCreated => "OnMatchCreated",
+            _ => panic!("Invalid value")
+        }
+    }
+}
