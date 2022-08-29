@@ -36,7 +36,7 @@ pub fn create_oracle_contract<T>(w: &web3::Web3<T>, address: H160) -> web3::cont
     )
 }
 
-pub fn create_platform_contract<T>(w: &web3::Web3<T>, ) -> web3::contract::Result<Contract<T>>
+pub fn create_platform_contract<T>(w: &web3::Web3<T>) -> web3::contract::Result<Contract<T>>
     where T: Transport
 {
     create_contract(w, PLATFORM_ADDRESS.into(), include_bytes!("./abi/GoodGame.json"))

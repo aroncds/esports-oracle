@@ -38,13 +38,22 @@ async fn initialize_events() -> web3::contract::Result<()> {
 
 async fn subscribe_events(w: web3::Web3<WebSocket>) -> web3::contract::Result<()> {
     let contract = contract::create_platform_contract(&w)?;
-    let sub = contract::subscribe(&w, &contract, Event::MatchCreated).await?;
+    let subs = tokio::try_join!(
+        contract::subscribe(&w, &contract, Event::MatchCreated),
+        contract::subscribe(&w, &contract, Event::BetCreated)
+    )?;
 
-    _ = tokio::join!(tokio::spawn(async move {
-        let on_match_created = contract.abi().event("MatchCreated").unwrap();
+    let subscriptions = tokio::spawn(async move {
+        let match_created = contract.abi().event("MatchCreated").unwrap();
+        let bet_created = contract.abi().event("MatchCreated").unwrap();
 
-        sub.for_each(handler::process_event(on_match_created)).await;
-    }));
+        tokio::join!(
+            subs.0.for_each(handler::process_event(match_created)),
+            subs.1.for_each(handler::process_event(bet_created))
+        );
+    });
+
+    _ = tokio::join!(subscriptions);
 
     Ok(())
 }

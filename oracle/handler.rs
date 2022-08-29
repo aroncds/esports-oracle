@@ -5,7 +5,7 @@ use log::info;
 use web3::types::Log;
 use web3::ethabi::RawLog;
 
-pub fn process_event<'a>(event: &'a web3::ethabi::Event) -> impl Fn(Result<Log, web3::Error>) -> Ready<()> + 'a{
+pub fn process_event(event: &web3::ethabi::Event) -> impl Fn(Result<Log, web3::Error>) -> Ready<()> + '_ {
     |log| {
         if let Ok(x) = log {
             let mut params = HashMap::new();
