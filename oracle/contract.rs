@@ -5,7 +5,7 @@ use web3::contract::Contract;
 use web3::types::{H160, FilterBuilder};
 use web3::transports::{Http, WebSocket};
 
-use crate::types::Event;
+use crate::events::types::Event;
 use crate::settings::{HTTP_PROVIDER, WS_PROVIDER, PLATFORM_ADDRESS};
 
 fn create_contract<T>(w: &web3::Web3<T>, address: H160, json: &[u8]) -> web3::contract::Result<Contract<T>>
