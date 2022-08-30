@@ -2,6 +2,7 @@ use web3::types::H256;
 use hex_literal::hex;
 
 const ON_MATCH_CREATED: [u8; 32] = hex!("e305bb6965bd4c391d63fd3798b907578aaedfb039342115cf18db4c0b3c07b0");
+
 const ON_BET_CREATED: [u8; 32] = hex!("fa298d3e4326da969389ce9252a0c4c47e5d093a8ebfe43b7ae8236484a3c8fd");
 
 pub enum Event {
@@ -50,4 +51,8 @@ impl From<Event> for &str {
             _ => panic!("Invalid value")
         }
     }
+}
+
+pub struct Task {
+    
 }
