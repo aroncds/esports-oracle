@@ -3,6 +3,6 @@ table! {
         id -> Int4,
         name -> Varchar,
         block_number -> Int8,
-        params -> Json,
+        params -> Text,
     }
 }

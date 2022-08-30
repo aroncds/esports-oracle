@@ -1,6 +1,10 @@
 use web3::types::H256;
 use hex_literal::hex;
 
+const MATCH_CREATED: &'static str  = "MatchCreated";
+const BET_CREATED: &'static str  = "BetCreated";
+const MATCH_FINISHED: &'static str = "MatchFinished";
+
 const ON_MATCH_CREATED: [u8; 32] = hex!("e305bb6965bd4c391d63fd3798b907578aaedfb039342115cf18db4c0b3c07b0");
 
 const ON_BET_CREATED: [u8; 32] = hex!("fa298d3e4326da969389ce9252a0c4c47e5d093a8ebfe43b7ae8236484a3c8fd");
@@ -45,13 +49,25 @@ impl From<Event> for H256 {
 impl From<Event> for &str {
     fn from(value: Event) -> Self {
         match value {
-            Event::MatchCreated => "MatchCreated",
-            Event::BetCreated => "BetCreated",
-            Event::MatchFinished => "MatchFinished",
+            Event::MatchCreated => MATCH_CREATED,
+            Event::BetCreated => BET_CREATED,
+            Event::MatchFinished => MATCH_FINISHED,
             _ => panic!("Invalid value")
         }
     }
 }
+
+impl From<&String> for Event {
+    fn from(value: &String) -> Self {
+        match value.as_str() {
+            MATCH_CREATED => Event::MatchCreated,
+            BET_CREATED => Event::BetCreated,
+            MATCH_FINISHED => Event::MatchFinished,
+            _ => panic!("Invalid value")
+        }
+    }
+}
+
 
 pub struct Task {
     
