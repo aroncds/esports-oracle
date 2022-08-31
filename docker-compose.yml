@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+    postgresql:
+        image: postgres
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=oracle
+            - POSTGRES_HOST_AUTH_METHOD=trust
+        ports:
+            - 5432:5432
