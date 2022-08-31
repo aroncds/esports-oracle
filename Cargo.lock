@@ -72,6 +72,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8da52d66c7071e2e3fa2a1e5c6d088fec47b593032b254f5e980de8ea54454d6"
 
 [[package]]
+name = "async-trait"
+version = "0.1.57"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76464446b8bc32758d7e88ee1a804d9914cd9b1cb264c029899680b0be29826f"
+dependencies = [
+ "proc-macro2",
+ "quote 1.0.21",
+ "syn 1.0.99",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -687,25 +698,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22030e2c5a68ec659fde1e949a745124b48e6fa8b045b7ed5bd1fe4ccc5c4e5d"
 
 [[package]]
-name = "goodgame-oracle"
-version = "0.1.0"
-dependencies = [
- "clap 3.2.18",
- "diesel 2.0.0",
- "diesel_cli",
- "dotenv 0.15.0",
- "env_logger",
- "hex-literal",
- "lazy_static",
- "log",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "web3",
-]
-
-[[package]]
 name = "h2"
 version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1062,6 +1054,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
+name = "mini-oracle"
+version = "0.1.0"
+dependencies = [
+ "clap 3.2.18",
+ "diesel 2.0.0",
+ "diesel_cli",
+ "dotenv 0.15.0",
+ "env_logger",
+ "hex-literal",
+ "lazy_static",
+ "log",
+ "oracle_data",
+ "serde",
+ "serde_json",
+ "tokio",
+ "web3",
+]
+
+[[package]]
 name = "miniz_oxide"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1203,6 +1214,14 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "oracle_data"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "reqwest",
 ]
 
 [[package]]

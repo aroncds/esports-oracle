@@ -1,0 +1,167 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "reason",
+        "type": "bytes32"
+      }
+    ],
+    "name": "cancelMatch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "winner",
+        "type": "bytes32"
+      }
+    ],
+    "name": "declareOutcome",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "winners",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint8[]",
+        "name": "percentage",
+        "type": "uint8[]"
+      }
+    ],
+    "name": "declareOutcomeWithPercentageReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getMatch",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "timelock",
+        "type": "uint32"
+      },
+      {
+        "internalType": "enum Oracle.GameState",
+        "name": "state",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "winners",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "cancelReason",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getName",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "timeLock",
+        "type": "uint32"
+      }
+    ],
+    "name": "startMatch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "externalGameId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "startMatchLocked",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "timeLock",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "externalGameId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "startMatchWithExternalGameId",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

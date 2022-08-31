@@ -21,7 +21,7 @@ fn create_args(event_name: &String, params: &EventParams) -> Option<Args> {
     match event_name.into() {
         Event::MatchCreated => Some(Args::MatchCreated(MatchCreatedParams::from(params))),
         Event::BetCreated => Some(Args::BetCreated(BetCreatedParams::from(params))),
-        _ => None
+        Event::MatchFinished => None
     }
 }
 

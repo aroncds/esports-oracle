@@ -1,4 +1,5 @@
 use hex_literal::hex;
+use lazy_static::lazy_static;
 
 pub const HTTP_PROVIDER: &'static str = "https://rpc.gglabs.gg/";
 

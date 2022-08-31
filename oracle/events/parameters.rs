@@ -1,7 +1,6 @@
 
 use std::collections::HashMap;
 
-use diesel::backend::Backend;
 use diesel::pg::Pg;
 use diesel::serialize::ToSql;
 use diesel::deserialize::FromSql;
@@ -33,20 +32,15 @@ pub enum Args {
     BetCreated(BetCreatedParams)
 }
 
-impl<DB> FromSql<Text, DB> for Args
-    where
-        DB: Backend,
-        String: FromSql<Text, DB>
+impl FromSql<Text, Pg> for Args
 {
-    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
-        let value = <String as FromSql<Text, DB>>::from_sql(bytes)?;
+    fn from_sql(bytes: diesel::backend::RawValue<'_, Pg>) -> diesel::deserialize::Result<Self> {
+        let value = <String as FromSql<Text, Pg>>::from_sql(bytes)?;
         Ok(serde_json::from_str(&value)?)
     }
 }
 
 impl ToSql<Text, Pg> for Args
-    where 
-        String: ToSql<Text, Pg>
 {
     fn to_sql<'b>(&'b self, out: &mut diesel::serialize::Output<'b, '_, Pg>) -> diesel::serialize::Result {
         let v = serde_json::to_string(&self)?;
@@ -72,14 +66,16 @@ impl From<&EventParams> for MatchCreatedParams {
             .unwrap()
             .as_u64();
 
-        let external_game_id: [u8; 32] = x.get("externalGameId")
-            .unwrap()
-            .clone()
-            .into_fixed_bytes()
-            .unwrap()
-            .try_into()
-            .unwrap();
-        
+        let mut external_game_id: [u8; 32] = [0; 32];
+
+        external_game_id.copy_from_slice(
+            &x.get("externalGameId")
+                .unwrap()
+                .clone()
+                .into_fixed_bytes()
+                .unwrap()[0..32]
+        );
+
         Self {
             game_id: game_id.into(),
             expire_time,
@@ -101,5 +97,15 @@ impl From<&EventParams> for BetCreatedParams {
         Self {
             game_id: game_id.into(),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_event_params_to_match_created_params() {
+        let params = EventParams::new();
     }
 }

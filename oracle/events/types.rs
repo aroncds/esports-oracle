@@ -1,14 +1,16 @@
 use web3::types::H256;
 use hex_literal::hex;
 
+/// Names
 const MATCH_CREATED: &'static str  = "MatchCreated";
 const BET_CREATED: &'static str  = "BetCreated";
 const MATCH_FINISHED: &'static str = "MatchFinished";
 
+/// Hex keccack256
 const ON_MATCH_CREATED: [u8; 32] = hex!("e305bb6965bd4c391d63fd3798b907578aaedfb039342115cf18db4c0b3c07b0");
-
 const ON_BET_CREATED: [u8; 32] = hex!("fa298d3e4326da969389ce9252a0c4c47e5d093a8ebfe43b7ae8236484a3c8fd");
 
+#[derive(Debug, PartialEq)]
 pub enum Event {
     MatchCreated,
     BetCreated,
@@ -68,7 +70,14 @@ impl From<&String> for Event {
     }
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
 
-pub struct Task {
-    
+    #[test]
+    fn test_convert_string_to_event() {
+        let value = String::from("MatchCreated");
+        let event: Event = (&value).into();
+        assert_eq!(event, Event::MatchCreated);
+    }
 }
