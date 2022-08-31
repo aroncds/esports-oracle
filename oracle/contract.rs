@@ -32,14 +32,14 @@ pub fn create_oracle_contract<T>(w: &web3::Web3<T>, address: H160) -> web3::cont
     create_contract(
         w,
         address,
-        include_bytes!("./abi/oracle.json")
+        include_bytes!("../abi/oracle.json")
     )
 }
 
 pub fn create_platform_contract<T>(w: &web3::Web3<T>) -> web3::contract::Result<Contract<T>>
     where T: Transport
 {
-    create_contract(w, PLATFORM_ADDRESS.into(), include_bytes!("./abi/platform.json"))
+    create_contract(w, PLATFORM_ADDRESS.into(), include_bytes!("../abi/platform.json"))
 }
 
 pub async fn subscribe(

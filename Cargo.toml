@@ -17,9 +17,6 @@ dotenv = "0.15.0"
 serde_json = "1.0.85"
 oracle_data = { path = "./oracle-data" }
 
-[dev-dependencies]
-diesel_cli = "1.4.1"
-
 [[bin]]
 path = "oracle/main.rs"
 name = "oracle"
