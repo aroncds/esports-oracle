@@ -1,5 +1,6 @@
 use log::{info, error};
 use clap::Parser;
+use dotenv::dotenv;
 
 #[macro_use]
 extern crate diesel;
@@ -28,6 +29,8 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> web3::contract::Result<()> {
+    dotenv().ok();
+
     let cli = Cli::parse();
 
     match cli.command {

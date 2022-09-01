@@ -25,7 +25,11 @@ fn create_args(event_name: &String, params: &EventParams) -> Option<Args> {
     }
 }
 
-fn create_event(event_name: String, block_height: u64, event_params: EventParams) {
+fn create_event(
+    event_name: String,
+    block_height: u64,
+    event_params: EventParams
+) {
     let mut conn = connect().expect("Failed");
 
     let event_db = EventDB {

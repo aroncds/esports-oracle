@@ -7,3 +7,15 @@ CREATE TABLE oracle_event (
     params text NOT NULL
 );
 
+CREATE TABLE oracle_collector (
+    id serial PRIMARY KEY,
+    block_number bigint NOT NULL,
+)
+
+CREATE TABLE oracle_match (
+    id serial PRIMARY KEY,
+    game_id varchar(80) NOT NULL,
+    expire_time bigint NOT NULL,
+    external_game_id varchar(80),
+    master_player varchar(80)
+)

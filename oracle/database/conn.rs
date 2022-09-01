@@ -1,6 +1,5 @@
 use diesel::{prelude::PgConnection, Connection};
-use dotenv::dotenv;
-use std::env;
+use crate::settings;
 
 #[derive(Debug)]
 pub enum DatabaseError {
@@ -9,10 +8,7 @@ pub enum DatabaseError {
 }
 
 pub fn connect() -> Result<PgConnection, DatabaseError> {
-    dotenv().ok();
-
-    let db_url = env::var("DATABASE_URL")
-        .map_err(|x| DatabaseError::InvalidUrl)?;
+    let db_url = settings::get_database_url();
 
     let connection = PgConnection::establish(&db_url)
         .map_err(|x| DatabaseError::FailedToConnect)?;
