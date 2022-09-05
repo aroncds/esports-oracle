@@ -7,15 +7,10 @@ use web3::transports::WebSocket;
 use super::types::Event;
 use crate::contract;
 
-use std::sync::{Arc, Mutex};
-
-struct Task(Event);
-
 pub struct Collector {
     space_time: u64,
     block_number: u64,
     provider: web3::Web3<WebSocket>,
-    queue: Arc<Mutex<Vec<Task>>>
 }
 
 impl Collector {
@@ -25,7 +20,6 @@ impl Collector {
             space_time,
             block_number: 0,
             provider: ws,
-            queue: Arc::new(Mutex::new(Vec::new()))
         }
     }
 

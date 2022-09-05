@@ -6,30 +6,24 @@ use riven::{
     consts::Region
 };
 
-use kv::{Config, Store, Bucket};
-
-use super::matches::{Error, MatchData, MatchInfo, State};
+use super::types::{Error, MatchData, MatchInfo, State};
 
 mod settings;
+mod store;
 
 pub struct LeagueOfLegends {
     api: riven::RiotApi,
-    store: Store,
+    store: store::PlayerStore,
 }
 
 impl LeagueOfLegends {
+
     pub fn new(credentials: String) -> Self {
-        let cfg = Config::new("./players");
-        let store = Store::new(cfg).expect("failed to open storage");
-    
+
         Self {
             api: RiotApi::with_key(credentials),
-            store
+            store: store::PlayerStore::new()
         }
-    }
-
-    fn get_bucket<'a>(&self) -> Result<Bucket<'a, String, String>, Error> {
-        self.store.bucket::<String, String>(Some("players")).map_err(|_| Error::CacheUnavailable)
     }
 
     async fn get_request_player_id(&self, name: &String) -> Result<String, Error> {
@@ -41,7 +35,7 @@ impl LeagueOfLegends {
 
         match summoner {
             Some(s) => {
-                let bucket = self.get_bucket()?;
+                let bucket = self.store.get_bucket()?;
                 bucket.set(name, &s.puuid).map_err(|_| Error::CacheSetFailed)?;
                 Ok(s.puuid)
             },
@@ -50,7 +44,7 @@ impl LeagueOfLegends {
     }
 
     fn get_kv_player_id(&self, name: &String) -> Result<Option<String>, Error> {
-        let player = self.get_bucket()?
+        let player = self.store.get_bucket()?
             .get(name)
             .map_err(|_| Error::CacheUnavailable)?;
 
@@ -119,6 +113,7 @@ impl MatchData<String> for LeagueOfLegends {
             state
         })
     }
+
 }
 
 #[cfg(test)]

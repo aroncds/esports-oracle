@@ -1,2 +1,2 @@
 pub mod riot;
-mod matches;
+mod types;
