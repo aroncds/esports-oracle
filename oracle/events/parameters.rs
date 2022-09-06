@@ -8,10 +8,11 @@ use diesel::expression::AsExpression;
 use diesel::sql_types::Text;
 use serde::Deserialize;
 use serde::Serialize;
+use web3::ethabi::LogParam;
 use web3::ethabi::Token;
 use web3::types::H256;
 
-type EventParams = HashMap<String, Token>;
+type EventParams = Vec<LogParam>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct MatchCreatedParams {
@@ -51,17 +52,19 @@ impl ToSql<Text, Pg> for Args
 
 impl From<&EventParams> for MatchCreatedParams {
     fn from(x: &EventParams) -> Self {
-        let game_id: [u8; 32] = x.get("gameId")
+        let game_id: [u8; 32] = x.get(3)
             .unwrap()
             .clone()
+            .value
             .into_fixed_bytes()
             .unwrap()
             .try_into()
             .unwrap();
 
-        let expire_time = x.get("expireTime")
+        let expire_time = x.get(8)
             .unwrap()
             .clone()
+            .value
             .into_uint()
             .unwrap()
             .as_u64();
@@ -69,9 +72,10 @@ impl From<&EventParams> for MatchCreatedParams {
         let mut external_game_id: [u8; 32] = [0; 32];
 
         external_game_id.copy_from_slice(
-            &x.get("externalGameId")
+            &x.get(4)
                 .unwrap()
                 .clone()
+                .value
                 .into_fixed_bytes()
                 .unwrap()[0..32]
         );
@@ -86,9 +90,10 @@ impl From<&EventParams> for MatchCreatedParams {
 
 impl From<&EventParams> for BetCreatedParams {
     fn from(x: &EventParams) -> Self {
-        let game_id: [u8; 32] = x.get("gameId")
+        let game_id: [u8; 32] = x.get(2)
             .unwrap()
             .clone()
+            .value
             .into_fixed_bytes()
             .unwrap()
             .try_into()

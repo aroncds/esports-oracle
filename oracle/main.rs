@@ -10,6 +10,10 @@ mod contract;
 mod settings;
 mod events;
 mod database;
+mod matches;
+
+use events::collector::Collector;
+use web3::futures::stream::Collect;
 
 #[derive(Parser)]
 enum SubCommand {
@@ -46,10 +50,14 @@ async fn start() -> web3::contract::Result<()> {
 
     info!("Oracle: Initializing");
 
-    let web3 = contract::create_ws_web3().await;
+    let web3 = contract::create_http_web3();
 
     match web3 {
-        Ok(w) => events::handler::subscribe_events(w).await?,
+        Ok(w) => {
+            let mut collector = Collector::new(w, 5000);
+            collector.init().await?;
+            collector.handle().await?;
+        },
         Err(_) => error!("Failed to connect to ws!")
     }
 

@@ -17,7 +17,9 @@ pub struct Event<'a> {
     /// Event name
     pub name: &'a str,
     /// params
-    pub params: Args
+    pub params: Args,
+
+    pub executed: bool
 }
 
 impl<'a> Event<'a> {
