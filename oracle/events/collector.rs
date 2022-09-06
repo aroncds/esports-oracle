@@ -1,16 +1,17 @@
-use std::collections::HashMap;
+use hex_literal::hex;
 use tokio::time;
 
 use log::info;
 
-use web3::types::Log;
-use web3::ethabi::{RawLog, Token};
+use web3::types::{Log, H256, H160};
+use web3::ethabi::RawLog;
 use web3::types::{BlockNumber, U64};
 use web3::{Web3, types::FilterBuilder};
 use web3::transports::Http;
 
 use super::types::Event;
 use crate::contract;
+use crate::settings;
 
 fn process_event(event: &web3::ethabi::Event, x: &Log) {
     let log = event.parse_log(RawLog {
@@ -51,6 +52,9 @@ impl Collector {
     pub async fn handle(&mut self) -> Result<(), web3::contract::Error> {
         let platform = contract::create_platform_contract(&self.provider)?;
 
+        let oracle = H160::from(settings::ORACLE_ADDRESS);
+        let oracle = H256::from(oracle);
+
         loop {
             let mut current_block = U64::from(self.block_number);
             let newest_block = self.get_current_block().await?;
@@ -62,7 +66,7 @@ impl Collector {
                     .address(vec![platform.address()])
                     .from_block(BlockNumber::Number(current_block))
                     .to_block(BlockNumber::Number(current_block))
-                    .topics(Some(vec![Event::MatchCreated.into(), Event::BetCreated.into()]), None, None, None)
+                    .topics(Some(vec![Event::MatchCreated.into(), Event::BetCreated.into()]), Some(vec![oracle]), None, None)
                     .build();
 
                 let filter = self.provider.eth().logs(filter).await?;
