@@ -48,13 +48,6 @@ impl From<Event> for H256 {
     }
 }
 
-impl PartialEq<H256> for Event {
-    fn eq(&self, other: &H256) -> bool {
-        let ev: H256 = (*self).into();
-        ev.eq(other)
-    }
-}
-
 impl From<Event> for &str {
     fn from(value: Event) -> Self {
         match value {
@@ -75,10 +68,6 @@ impl From<&String> for Event {
             _ => panic!("Invalid value")
         }
     }
-}
-
-pub trait RunEvent {
-    fn run(&self);
 }
 
 #[cfg(test)]

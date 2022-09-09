@@ -1,7 +1,7 @@
 use web3::ethabi::LogParam;
 
 use crate::database::schema::oracle_event;
-use super::parameters::Args;
+use super::fields::Args;
 
 #[derive(Debug, Insertable)]
 #[diesel(table_name = oracle_event)]

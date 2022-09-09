@@ -54,8 +54,8 @@ impl Collector {
                 info!("Collecting events from {:?}", current_block);
 
                 self.request_events(&platform, current_block).await?
-                    .save_events(&platform);
-                    //.process_events();
+                    .save_events(&platform)
+                    .process_events();
 
                 current_block += U64::from(1u64);
             }

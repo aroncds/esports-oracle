@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use diesel::RunQueryDsl;
 
+use log::info;
 use web3::contract::Contract;
 use web3::transports::Http;
 use web3::types::H256;
@@ -20,18 +21,9 @@ pub struct Processor(pub Vec<Log>);
 
 impl Processor {
 
-    fn get_events(&self, platform: &Contract<Http>) -> EventDict {
-        let mut events: EventDict = HashMap::new();
-
-        events.insert(Event::MatchCreated.into(), platform.abi().event("MatchCreated").unwrap().clone());
-        events.insert(Event::BetCreated.into(), platform.abi().event("BetCreated").unwrap().clone());
-
-        events
-    }
-
     pub fn save_events(&self, platform: &Contract<Http>) -> &Self {
         let mut conn = crate::database::conn::establish_connection().unwrap();
-        let events = self.get_events(platform);
+        let events = get_events_map(platform);
 
         let events: Vec<EventDB> = (&self.0)
             .into_iter()
@@ -45,6 +37,19 @@ impl Processor {
 
         self
     }
+
+    pub fn process_events(&self) -> &Self {
+        self
+    }
+}
+
+fn get_events_map(platform: &Contract<Http>) -> EventDict {
+    let mut events: EventDict = HashMap::new();
+
+    events.insert(Event::MatchCreated.into(), platform.abi().event("MatchCreated").unwrap().clone());
+    events.insert(Event::BetCreated.into(), platform.abi().event("BetCreated").unwrap().clone());
+
+    events
 }
 
 fn process_event(events: &EventDict, x: &Log) -> EventDB {
@@ -54,6 +59,8 @@ fn process_event(events: &EventDict, x: &Log) -> EventDB {
         topics: x.topics.clone(),
         data: x.data.0.clone()
     }).unwrap();
+
+    info!("{:?} - GameID: {:?}", event.name, log.params);
 
     EventDB::new(
         &event.name,
