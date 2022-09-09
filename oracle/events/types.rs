@@ -77,6 +77,10 @@ impl From<&String> for Event {
     }
 }
 
+pub trait RunEvent {
+    fn run(&self);
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

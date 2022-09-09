@@ -1,6 +1,3 @@
-
-use std::collections::HashMap;
-
 use diesel::pg::Pg;
 use diesel::serialize::ToSql;
 use diesel::deserialize::FromSql;
@@ -9,8 +6,9 @@ use diesel::sql_types::Text;
 use serde::Deserialize;
 use serde::Serialize;
 use web3::ethabi::LogParam;
-use web3::ethabi::Token;
 use web3::types::H256;
+
+use super::types::Event;
 
 type EventParams = Vec<LogParam>;
 
@@ -31,6 +29,16 @@ pub struct BetCreatedParams {
 pub enum Args {
     MatchCreated(MatchCreatedParams),
     BetCreated(BetCreatedParams)
+}
+
+impl Args {
+    pub fn create(event_name: &String, params: &EventParams) -> Option<Args> {
+        match event_name.into() {
+            Event::MatchCreated => Some(Args::MatchCreated(MatchCreatedParams::from(params))),
+            Event::BetCreated => Some(Args::BetCreated(BetCreatedParams::from(params))),
+            Event::MatchFinished => None
+        }
+    }
 }
 
 impl FromSql<Text, Pg> for Args

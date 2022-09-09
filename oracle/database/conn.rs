@@ -7,7 +7,7 @@ pub enum DatabaseError {
     FailedToConnect,
 }
 
-pub fn connect() -> Result<PgConnection, DatabaseError> {
+pub fn establish_connection() -> Result<PgConnection, DatabaseError> {
     let db_url = settings::get_database_url();
 
     let connection = PgConnection::establish(&db_url)

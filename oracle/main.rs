@@ -5,6 +5,7 @@ use dotenv::dotenv;
 #[macro_use]
 extern crate diesel;
 extern crate serde;
+extern crate oracle_data;
 
 mod contract;
 mod settings;
@@ -13,7 +14,6 @@ mod database;
 mod matches;
 
 use events::collector::Collector;
-use web3::futures::stream::Collect;
 
 #[derive(Parser)]
 enum SubCommand {
