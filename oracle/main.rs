@@ -2,18 +2,16 @@ use log::{info, error};
 use clap::Parser;
 use dotenv::dotenv;
 
-#[macro_use]
-extern crate diesel;
 extern crate serde;
 extern crate oracle_data;
 
 mod contract;
 mod settings;
-mod events;
+mod chain;
 mod database;
 mod matches;
 
-use events::collector::Collector;
+use chain::collector::Collector;
 
 #[derive(Parser)]
 enum SubCommand {
@@ -55,8 +53,8 @@ async fn start() -> web3::contract::Result<()> {
     match web3 {
         Ok(w) => {
             let mut collector = Collector::new(w, 5000);
-            collector.init().await?;
-            collector.handle().await?;
+            collector.init().await;
+            collector.handle().await;
         },
         Err(_) => error!("Failed to connect to ws!")
     }

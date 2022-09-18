@@ -53,8 +53,7 @@ impl From<Event> for &str {
         match value {
             Event::MatchCreated => MATCH_CREATED,
             Event::BetCreated => BET_CREATED,
-            Event::MatchFinished => MATCH_FINISHED,
-            _ => panic!("Invalid value")
+            Event::MatchFinished => MATCH_FINISHED
         }
     }
 }

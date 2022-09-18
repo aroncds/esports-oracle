@@ -1,9 +1,9 @@
 use web3::Transport;
 use web3::contract::Contract;
 use web3::types::H160;
-use web3::transports::{Http, WebSocket};
+use web3::transports::Http;
 
-use crate::settings::{HTTP_PROVIDER, WS_PROVIDER, PLATFORM_ADDRESS};
+use crate::settings::{HTTP_PROVIDER, PLATFORM_ADDRESS};
 
 fn create_contract<T>(w: &web3::Web3<T>, address: H160, json: &[u8]) -> web3::contract::Result<Contract<T>>
     where T: Transport

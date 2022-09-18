@@ -1,10 +1,6 @@
-use diesel::pg::Pg;
-use diesel::serialize::ToSql;
-use diesel::deserialize::FromSql;
-use diesel::expression::AsExpression;
-use diesel::sql_types::Text;
 use serde::Deserialize;
 use serde::Serialize;
+
 use web3::ethabi::LogParam;
 use web3::types::H256;
 
@@ -24,8 +20,7 @@ pub struct BetCreatedParams {
     pub game_id: H256
 }
 
-#[derive(Debug, AsExpression, Deserialize, Serialize)]
-#[diesel(sql_type = Text)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Args {
     MatchCreated(MatchCreatedParams),
     BetCreated(BetCreatedParams)
@@ -38,23 +33,6 @@ impl Args {
             Event::BetCreated => Some(Args::BetCreated(BetCreatedParams::from(params))),
             Event::MatchFinished => None
         }
-    }
-}
-
-impl FromSql<Text, Pg> for Args
-{
-    fn from_sql(bytes: diesel::backend::RawValue<'_, Pg>) -> diesel::deserialize::Result<Self> {
-        let value = <String as FromSql<Text, Pg>>::from_sql(bytes)?;
-        Ok(serde_json::from_str(&value)?)
-    }
-}
-
-impl ToSql<Text, Pg> for Args
-{
-    fn to_sql<'b>(&'b self, out: &mut diesel::serialize::Output<'b, '_, Pg>) -> diesel::serialize::Result {
-        let v = serde_json::to_string(&self)?;
-        
-        <String as ToSql<Text, Pg>>::to_sql(&v, &mut out.reborrow())
     }
 }
 

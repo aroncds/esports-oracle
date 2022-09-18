@@ -9,7 +9,8 @@ use web3::{Web3, types::FilterBuilder};
 use web3::transports::Http;
 
 use super::types::Event;
-use super::processor::Processor;
+use super::block::{LogDataHandler, BlockData};
+use super::error::ChainError;
 use crate::contract;
 use crate::settings;
 
@@ -34,30 +35,28 @@ impl Collector {
         }
     }
 
-    async fn get_current_block(&self) -> Result<U64, web3::Error> {
-        self.provider.eth().block_number().await
+    async fn get_current_block(&self) -> Result<U64, ChainError> {
+        self.provider.eth().block_number().await.map_err(|_| ChainError::BlockHeightFailed)
     }
 
-    pub async fn init(&mut self) -> Result<(), web3::Error> {
+    pub async fn init(&mut self) -> Result<(), ChainError> {
         self.block_number = self.get_current_block().await?.as_u64();
         Ok(())
     }
 
-    pub async fn handle(&mut self) -> Result<(), web3::contract::Error> {
-        let platform = contract::create_platform_contract(&self.provider)?;
+    pub async fn handle(&mut self) -> Result<(), ChainError> {
+        let platform = contract::create_platform_contract(&self.provider)
+            .map_err(|_| ChainError::ContractFailedToLoad)?;
 
         loop {
-            let mut current_block = U64::from(self.block_number);
+            let current_block = U64::from(self.block_number);
             let newest_block = self.get_current_block().await?;
 
-            while current_block.as_u64() < newest_block.as_u64() {
+            for i in current_block.as_u64()..newest_block.as_u64() {
                 info!("Collecting events from {:?}", current_block);
 
-                self.request_events(&platform, current_block).await?
-                    .save_events(&platform)
-                    .process_events();
-
-                current_block += U64::from(1u64);
+                self.request_events(&platform, U64::from(i)).await?
+                    .save(&platform).await?;
             }
 
             self.block_number = newest_block.as_u64();
@@ -66,7 +65,7 @@ impl Collector {
         }
     }
 
-    async fn request_events(&self, platform: &Contract<Http>, block: U64) -> Result<Processor, web3::contract::Error> {
+    async fn request_events(&self, platform: &Contract<Http>, block: U64) -> Result<impl LogDataHandler, ChainError> {
         let filter = FilterBuilder::default()
             .address(vec![platform.address()])
             .from_block(BlockNumber::Number(block))
@@ -74,8 +73,10 @@ impl Collector {
             .topics(Some(vec![Event::MatchCreated.into(), Event::BetCreated.into()]), Some(vec![self.oracle]), None, None)
             .build();
 
-        let logs = self.provider.eth().logs(filter).await?;
+        let logs = self.provider.eth().logs(filter)
+            .await
+            .map_err(|_| ChainError::FailedToLoadLogs(block.as_u64()))?;
 
-        Ok(Processor(logs))
+        Ok(BlockData(logs))
     }
 }
