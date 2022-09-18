@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use log::info;
-use sea_orm::EntityTrait;
 use serde_json::json;
 use async_trait::async_trait;
+use sea_orm::EntityTrait;
+use sea_orm::ActiveValue::{NotSet, Set};
 
 use web3::contract::Contract;
 use web3::transports::Http;
@@ -11,24 +12,23 @@ use web3::types::H256;
 use web3::types::Log;
 use web3::ethabi::RawLog;
 
-use sea_orm::ActiveValue::{NotSet, Set};
-
 use super::types::Event;
-use super::error::ChainError;
+use super::error::Result;
+use super::fields::Args;
 use crate::database::event;
 
 type EventDict = HashMap<H256, web3::ethabi::Event>;
 
 #[async_trait]
 pub trait LogDataHandler {
-    async fn save(&self, platform: &Contract<Http>) -> Result<(), ChainError>;
+    async fn save(&self, platform: &Contract<Http>) -> Result<()>;
 }
 
 pub struct BlockData(pub Vec<Log>);
 
 #[async_trait]
 impl LogDataHandler for BlockData {
-    async fn save(&self, platform: &Contract<Http>) -> Result<(), ChainError> {
+    async fn save(&self, platform: &Contract<Http>) -> Result<()> {
         if self.0.len() == 0 {
             return Ok(());
         }
@@ -41,9 +41,7 @@ impl LogDataHandler for BlockData {
             .map(|x| create_event_db(&events, &x))
             .collect();
 
-        event::Entity::insert_many(events)
-            .exec(&*conn).await
-            .map_err(|x| ChainError::EventInsertFailed(x.to_string()))?;
+        event::Entity::insert_many(events).exec(&*conn).await?;
 
         Ok(())
     }
@@ -72,7 +70,7 @@ fn create_event_db(events: &EventDict, x: &Log) -> event::ActiveModel {
         id: NotSet,
         name: Set(event.name.clone()),
         block_number: Set(x.block_number.unwrap().as_u64() as i64),
-        params: Set(json!({"aron": 1})),
+        params: Set(json!(Args::create(&event.name, &log.params))),
         executed: Set(false)
     }
 }

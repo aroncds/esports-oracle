@@ -1,51 +1,70 @@
-// use crate::chain::{
-//     // models::EventInsertable,
-//     fields::Args
-// };
+use std::sync::Arc;
 
-// pub enum Error {
-//     ArgumentInvalid,
-//     DatabaseError(String)
-// }
+use sea_orm::{
+    ActiveValue::{NotSet, Set},
+    EntityTrait,
+    DatabaseConnection,
+    QueryFilter,
+    ColumnTrait
+};
 
-// pub trait BlockEventExecutor {
-//     fn run(&self, event: &EventInsertable, conn: &mut PgConnection) -> Result<(), Error>;
-// }
+use crate::chain::{fields::Args};
+use crate::database::matches;
+use super::error::MatchError;
 
-// pub struct OnMatchCreated;
+#[async_trait::async_trait]
+pub trait BlockEventExecutor: Sync + Send {
+    async fn run(&self, event: &Args, db: Arc<DatabaseConnection>) -> Result<(), MatchError>;
+}
 
-// impl BlockEventExecutor for OnMatchCreated {
-//     fn run(&self, event: &EventInsertable, conn: &mut PgConnection) -> Result<(), Error> {
-//         if let Args::MatchCreated(x) = &event.params {
+pub struct OnMatchCreated;
 
-//             let m = MatchInsertable {
-//                 game_id: WH256(x.game_id),
-//                 oracle: WH256(x.game_id),
-//                 expire_time: x.expire_time as i64,
-//                 bet_count: 0,
-//                 state: MatchState::Created,
-//                 master_player: None,
-//                 external_game_id: Some(WH256(x.external_game_id)),
-//             };
-            
-//             return Ok(());
-//         }
+#[async_trait::async_trait]
+impl BlockEventExecutor for OnMatchCreated {
+    async fn run(&self, args: &Args, db: Arc<DatabaseConnection>) -> Result<(), MatchError> {
+        if let Args::MatchCreated(x) = args {
 
-//         Err(Error::ArgumentInvalid)
-//     }
-// }
+            let m = matches::ActiveModel {
+                id: NotSet,
+                game_id: Set(x.game_id.to_string()),
+                oracle: Set(x.game_id.to_string()),
+                expire_time: Set(x.expire_time as i64),
+                external_game_id: Set(x.external_game_id.to_string()),
+                state: Set(1),
+                master_player: NotSet
+            };
 
-// pub struct OnBetCreated; 
+            matches::Entity::insert(m).exec(&*db).await?;
 
-// impl BlockEventExecutor for OnBetCreated {
+            return Ok(());
+        }
 
-//     fn run(&self, event: &EventInsertable, conn: &mut PgConnection) -> Result<(), Error> {
-//         if let Args::BetCreated(x) = &event.params {
+        Err(MatchError::ArgumentInvalid)
+    }
+}
 
+pub struct OnBetCreated; 
 
-//             return Ok(());
-//         }
+#[async_trait::async_trait]
+impl BlockEventExecutor for OnBetCreated {
+    async fn run(&self, args: &Args, db: Arc<DatabaseConnection>) -> Result<(), MatchError> {
+        if let Args::BetCreated(x) = args {
 
-//         Err(Error::ArgumentInvalid)
-//     }
-// }
+            let game_id = x.game_id;
+
+            let m = matches::Entity::find()
+                .filter(matches::Column::GameId.eq(game_id.to_string()))
+                .one(&*db).await?;
+
+            if let Some(x) = m {
+                if let None = x.master_player {
+                    
+                }
+            }
+
+            return Ok(());
+        }
+
+        Err(MatchError::ArgumentInvalid)
+    }
+}

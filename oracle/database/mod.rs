@@ -7,6 +7,7 @@ use lazy_static::lazy_static;
 
 pub mod prelude;
 pub mod event;
+pub mod matches;
 mod conn;
 
 pub use conn::establish_connection;

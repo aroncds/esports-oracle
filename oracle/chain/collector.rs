@@ -10,9 +10,9 @@ use web3::transports::Http;
 
 use super::types::Event;
 use super::block::{LogDataHandler, BlockData};
-use super::error::ChainError;
+use super::error::Result;
 use crate::contract;
-use crate::settings;
+use crate::settings; 
 
 pub struct Collector {
     space_time: u64,
@@ -35,18 +35,19 @@ impl Collector {
         }
     }
 
-    async fn get_current_block(&self) -> Result<U64, ChainError> {
-        self.provider.eth().block_number().await.map_err(|_| ChainError::BlockHeightFailed)
+    async fn get_current_block(&self) -> Result<U64> {
+        let number = self.provider.eth().block_number().await?;
+
+        Ok(number)
     }
 
-    pub async fn init(&mut self) -> Result<(), ChainError> {
+    pub async fn init(&mut self) -> Result<()> {
         self.block_number = self.get_current_block().await?.as_u64();
         Ok(())
     }
 
-    pub async fn handle(&mut self) -> Result<(), ChainError> {
-        let platform = contract::create_platform_contract(&self.provider)
-            .map_err(|_| ChainError::ContractFailedToLoad)?;
+    pub async fn handle(&mut self) -> Result<()> {
+        let platform = contract::create_platform_contract(&self.provider)?;
 
         loop {
             let current_block = U64::from(self.block_number);
@@ -65,7 +66,7 @@ impl Collector {
         }
     }
 
-    async fn request_events(&self, platform: &Contract<Http>, block: U64) -> Result<impl LogDataHandler, ChainError> {
+    async fn request_events(&self, platform: &Contract<Http>, block: U64) -> Result<impl LogDataHandler> {
         let filter = FilterBuilder::default()
             .address(vec![platform.address()])
             .from_block(BlockNumber::Number(block))
@@ -73,9 +74,7 @@ impl Collector {
             .topics(Some(vec![Event::MatchCreated.into(), Event::BetCreated.into()]), Some(vec![self.oracle]), None, None)
             .build();
 
-        let logs = self.provider.eth().logs(filter)
-            .await
-            .map_err(|_| ChainError::FailedToLoadLogs(block.as_u64()))?;
+        let logs = self.provider.eth().logs(filter).await?;
 
         Ok(BlockData(logs))
     }
